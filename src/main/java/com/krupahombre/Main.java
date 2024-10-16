@@ -1,13 +1,13 @@
 package com.krupahombre;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws IOException {
         String filename = "src/main/resources/ulysses16.tsp";
         Integer bestSolution = 6859;
+        String initPopulationStrategy = "greedy";
 
         TSPParser parser = new TSPParser();
 
@@ -15,12 +15,14 @@ public class Main {
             parser.parse(filename);
             List<City> cities = parser.getCities();
 
-            System.out.println("Wczytane miasta:");
-            for (City city : cities) {
-                System.out.println(city);
-            }
+            int popSize = 100;
+            int generations = 10;
+            double crossoverProbability = 0.7;
+            double mutationProbability = 0.1;
+            int tournamentSize = 5;
 
-            System.out.println(Arrays.deepToString(parser.getDistanceMatrix()));
+            GeneticAlgorithm ga = new GeneticAlgorithm(parser.getDistanceMatrix(), popSize, generations, crossoverProbability, mutationProbability, tournamentSize);
+            Integer bestFoundSolution = ga.run(cities.size(), initPopulationStrategy);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
