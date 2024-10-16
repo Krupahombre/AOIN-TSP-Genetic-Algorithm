@@ -8,13 +8,14 @@ import java.util.List;
 
 public class TSPParser {
     private List<City> cities;
-    private double[][] distanceMatrix;
+    private int[][] distanceMatrix;
+    private String edgeWeightType;
 
     public TSPParser() {
         this.cities = new ArrayList<>();
     }
 
-    public double[][] getDistanceMatrix() {
+    public int[][] getDistanceMatrix() {
         return distanceMatrix;
     }
 
@@ -24,6 +25,9 @@ public class TSPParser {
 
         while ((line = reader.readLine()) != null) {
             line = line.trim();
+            if (line.startsWith("EDGE_WEIGHT_TYPE")) {
+                this.edgeWeightType = line.split(":")[1].trim();
+            }
             if (line.startsWith("NODE_COORD_SECTION")) {
                 break;
             }
@@ -44,13 +48,17 @@ public class TSPParser {
         }
 
         int size = cities.size();
-        distanceMatrix = new double[size][size];
+        distanceMatrix = new int[size][size];
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 if (i != j) {
-                    distanceMatrix[i][j] = cities.get(i).distanceTo(cities.get(j));
+                    if ("EUC_2D".equals(edgeWeightType)) {
+                        distanceMatrix[i][j] = cities.get(i).distanceToEUC_2D(cities.get(j));
+                    } else if ("GEO".equals(edgeWeightType)) {
+                        distanceMatrix[i][j] = cities.get(i).distanceToGEO(cities.get(j));
+                    }
                 } else {
-                    distanceMatrix[i][j] = 0.0;
+                    distanceMatrix[i][j] = 0;
                 }
             }
         }

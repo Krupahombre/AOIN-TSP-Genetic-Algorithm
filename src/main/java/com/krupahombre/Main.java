@@ -6,7 +6,8 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        String filename = "src/main/resources/berlin52.tsp";
+        String filename = "src/main/resources/ulysses16.tsp";
+        Integer bestSolution = 6859;
 
         TSPParser parser = new TSPParser();
 
