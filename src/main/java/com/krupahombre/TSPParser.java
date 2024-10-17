@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TSPParser {
-    private List<City> cities;
+    private final List<City> cities;
     private int[][] distanceMatrix;
     private String edgeWeightType;
 
@@ -38,7 +38,7 @@ public class TSPParser {
             if (line.equals("EOF")) {
                 break;
             }
-            String[] parts = line.split(" ");
+            String[] parts = line.split("\\s+");
             if (parts.length >= 3) {
                 int id = Integer.parseInt(parts[0]);
                 double x = Double.parseDouble(parts[1]);
@@ -68,9 +68,5 @@ public class TSPParser {
 
     public List<City> getCities() {
         return cities;
-    }
-
-    public double getDistance(int city1, int city2) {
-        return distanceMatrix[city1 - 1][city2 - 1];
     }
 }
