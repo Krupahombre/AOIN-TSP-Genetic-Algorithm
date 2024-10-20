@@ -58,7 +58,7 @@ public class GeneticAlgorithm {
         };
     }
 
-    private List<Integer> crossoverIndividuals(String crossoverStrategy, List<Integer> parent1, List<Integer> parent2) {
+    private List<List<Integer>> crossoverIndividuals(String crossoverStrategy, List<Integer> parent1, List<Integer> parent2) {
         if (random.nextDouble() < crossoverProbability) {
             return switch (crossoverStrategy.toLowerCase()) {
                 case "ox" -> orderedCrossover(parent1, parent2);
@@ -66,7 +66,7 @@ public class GeneticAlgorithm {
                 default -> throw new IllegalArgumentException("Invalid mutation strategy: " + crossoverStrategy);
             };
         } else {
-            return parent1;
+            return List.of(parent1);
         }
     }
 
@@ -152,7 +152,7 @@ public class GeneticAlgorithm {
     }
 
     /// CROSSOVER
-    private List<Integer> orderedCrossover(List<Integer> parent1, List<Integer> parent2) {
+    private List<List<Integer>> orderedCrossover(List<Integer> parent1, List<Integer> parent2) {
         int size = parent1.size();
         int start = random.nextInt(size);
         int end = random.nextInt(size - start) + start;
@@ -177,11 +177,51 @@ public class GeneticAlgorithm {
             }
         }
 
-        return child;
+        return List.of(child);
     }
 
-    private List<Integer> partiallyMappedCrossover(List<Integer> parent1, List<Integer> parent2) {
-        return null;
+    private List<List<Integer>> partiallyMappedCrossover(List<Integer> parent1, List<Integer> parent2) {
+        int size = parent1.size();
+        int start = random.nextInt(size);
+        int end = random.nextInt(size - start) + start;
+
+//        int size = 9;
+//        int start = 3;
+//        int end = 5;
+
+        var mapOneTwo = new HashMap<Integer, Integer>();
+        var mapTwoOne = new HashMap<Integer, Integer>();
+
+        for (int i = start; i <= end; i++) {
+            mapOneTwo.put(parent1.get(i), parent2.get(i));
+            mapTwoOne.put(parent2.get(i), parent1.get(i));
+        }
+
+        List<Integer> child1 = constructChild(parent1, parent2, mapOneTwo, start, end);
+        List<Integer> child2 = constructChild(parent2, parent1, mapTwoOne, start, end);
+
+        return List.of(child1, child2);
+    }
+
+    private List<Integer> constructChild(List<Integer> baseParent, List<Integer> otherParent, Map<Integer, Integer> mapping, int start, int end) {
+        int size = baseParent.size();
+        List<Integer> child = new ArrayList<>(Collections.nCopies(size, -1));
+
+        for (int i = start; i <= end; i++) {
+            child.set(i, baseParent.get(i));
+        }
+
+        for (int i = 0; i < size; i++) {
+            if (child.get(i) == -1) {
+                int gene = otherParent.get(i);
+                while (mapping.containsKey(gene)) {
+                    gene = mapping.get(gene);
+                }
+                child.set(i, gene);
+            }
+        }
+
+        return child;
     }
 
     /// MUTATION
@@ -220,16 +260,22 @@ public class GeneticAlgorithm {
             while (newPopulation.size() < popSize) {
                 List<Integer> parent1 = selectIndividual(selectionStrategy);
                 List<Integer> parent2 = selectIndividual(selectionStrategy);
+//                List<Integer> parent1 = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
+//                List<Integer> parent2 = Arrays.asList(4 ,3 ,1 ,2 ,8 ,7 ,5 ,6 ,9);
 
-                List<Integer> offspring;
+                List<List<Integer>> offspring;
                 offspring = crossoverIndividuals(crossoverStrategy, parent1, parent2);
-                mutateIndividual(mutationStrategy, offspring);
-                newPopulation.add(offspring);
+                for (List<Integer> child : offspring) {
+                    mutateIndividual(mutationStrategy, child);
+                    newPopulation.add(child);
 
-                int offspringSolution = evaluate(offspring);
-                if (offspringSolution < bestSolution) {
-                    bestPath = offspring;
-                    bestSolution = offspringSolution;
+                    int offspringSolution = evaluate(child);
+                    if (offspringSolution < bestSolution) {
+                        bestPath = child;
+                        bestSolution = offspringSolution;
+                    }
+
+                    if (newPopulation.size() >= popSize) break;
                 }
             }
 

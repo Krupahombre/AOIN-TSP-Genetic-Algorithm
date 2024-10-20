@@ -11,12 +11,13 @@ public class Main {
     }
 
     public static void main(String[] args) throws IOException {
-        String filename = "src/main/resources/berlin52.tsp";
-        String initPopulationStrategy = "greedy";
-        String selectionStrategy = "tournament";
-        String crossoverStrategy = "ox";
-        String mutationStrategy = "inverse";
-        Integer bestKnown = 7542;
+        String filename = "src/main/resources/gr666.tsp";
+        String initPopulationStrategy = "greedy"; //greedy
+        String selectionStrategy = "tournament";  //roulette
+        String crossoverStrategy = "pmx"; //cx
+        String mutationStrategy = "swap"; //inverse
+        // Integer bestKnown = 7542; berlin
+        Integer bestKnown = 294358;
 
         TSPParser parser = new TSPParser();
 
