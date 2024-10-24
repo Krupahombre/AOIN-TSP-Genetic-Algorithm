@@ -38,6 +38,7 @@ public class GreedyAlgorithm {
             totalCost += currentCost;
         }
 
+        System.out.println("- Greedy done!");
         return PathCreationUtils.createAndCalculatePath(totalCost, bestCost, worstCost, costs, citiesNum);
     }
 

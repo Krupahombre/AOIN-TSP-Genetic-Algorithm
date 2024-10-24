@@ -1,5 +1,8 @@
 package com.krupahombre.algorithms;
 
+import com.krupahombre.algorithms.utils.Path;
+import com.krupahombre.algorithms.utils.PathCreationUtils;
+
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -185,10 +188,6 @@ public class GeneticAlgorithm {
         int start = random.nextInt(size);
         int end = random.nextInt(size - start) + start;
 
-//        int size = 9;
-//        int start = 3;
-//        int end = 5;
-
         var mapOneTwo = new HashMap<Integer, Integer>();
         var mapTwoOne = new HashMap<Integer, Integer>();
 
@@ -242,7 +241,7 @@ public class GeneticAlgorithm {
     }
 
     /// STARTING POINT
-    public Integer run(
+    private Integer run(
             int citiesNumber,
             String initPopulationStrategy,
             String selectionStrategy,
@@ -256,12 +255,11 @@ public class GeneticAlgorithm {
 
         for (int generation = 0; generation < generations; generation++) {
             List<List<Integer>> newPopulation = new ArrayList<>();
+            List<Integer> costs = new ArrayList<>();
 
             while (newPopulation.size() < popSize) {
                 List<Integer> parent1 = selectIndividual(selectionStrategy);
                 List<Integer> parent2 = selectIndividual(selectionStrategy);
-//                List<Integer> parent1 = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
-//                List<Integer> parent2 = Arrays.asList(4 ,3 ,1 ,2 ,8 ,7 ,5 ,6 ,9);
 
                 List<List<Integer>> offspring;
                 offspring = crossoverIndividuals(crossoverStrategy, parent1, parent2);
@@ -270,24 +268,65 @@ public class GeneticAlgorithm {
                     newPopulation.add(child);
 
                     int offspringSolution = evaluate(child);
-                    if (offspringSolution < bestSolution) {
-                        bestPath = child;
-                        bestSolution = offspringSolution;
-                    }
+                    bestSolution = Math.min(bestSolution, offspringSolution);
 
                     if (newPopulation.size() >= popSize) break;
                 }
             }
-
-            population = newPopulation;
-
-            System.out.println("Generation " + generation + " Best distance: " + bestSolution);
         }
 
-        System.out.println("\nBest path: " + bestPath);
-        System.out.println("Best solution: " + bestSolution);
-        System.out.println("\n");
-
         return bestSolution;
+    }
+
+    public static Path executeGA(
+            int[][] distanceMatrix,
+            int citiesSize,
+            String initPopulationStrategy,
+            String selectionStrategy,
+            String crossoverStrategy,
+            String mutationStrategy
+    ) {
+        int popSize = 500;
+        int generations = 3000;
+        double crossoverProbability = 0.7;
+        double mutationProbability = 0.1;
+        int tournamentSize = 5;
+
+        List<Integer> costsGA = new ArrayList<>();
+        int bestCostGA = Integer.MAX_VALUE;
+        int worstCostGA = 0;
+        int totalCostGA = 0;
+
+        for (int i = 0; i < 10; i++) {
+            GeneticAlgorithm ga = new GeneticAlgorithm(
+                    distanceMatrix,
+                    popSize,
+                    generations,
+                    crossoverProbability,
+                    mutationProbability,
+                    tournamentSize
+            );
+
+            Integer bestFoundSolution = ga.run(
+                    citiesSize,
+                    initPopulationStrategy,
+                    selectionStrategy,
+                    crossoverStrategy,
+                    mutationStrategy
+            );
+
+            costsGA.add(bestFoundSolution);
+            bestCostGA = Math.min(bestCostGA, bestFoundSolution);
+            worstCostGA = Math.max(worstCostGA, bestFoundSolution);
+            totalCostGA += bestFoundSolution;
+
+            System.out.println("--- GA iteration no. " + (i + 1));
+            System.out.println("Total cost: " + totalCostGA);
+            System.out.println("Best found solution: " + bestFoundSolution);
+            System.out.println("Worst found solution: " + worstCostGA);
+        }
+
+        System.out.println("- GA done!");
+        return PathCreationUtils.createAndCalculatePath(totalCostGA, bestCostGA, worstCostGA, costsGA, 10);
     }
 }

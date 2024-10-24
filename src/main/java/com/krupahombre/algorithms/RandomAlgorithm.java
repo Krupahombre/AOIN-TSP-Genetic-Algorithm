@@ -36,6 +36,7 @@ public class RandomAlgorithm {
             totalCost += currentCost;
         }
 
+        System.out.println("- Random done!");
         return PathCreationUtils.createAndCalculatePath(totalCost, bestCost, worstCost, costs, iterations);
     }
 }
