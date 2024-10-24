@@ -4,6 +4,7 @@ import com.krupahombre.algorithms.GeneticAlgorithm;
 import com.krupahombre.algorithms.GreedyAlgorithm;
 import com.krupahombre.algorithms.RandomAlgorithm;
 import com.krupahombre.algorithms.utils.Path;
+import com.krupahombre.helpers.CSVWriterHelper;
 import com.krupahombre.helpers.City;
 import com.krupahombre.helpers.TSPParser;
 
@@ -20,27 +21,38 @@ public class Main {
         Integer bestKnown = 7542; //berlin
 
         TSPParser parser = new TSPParser();
+        CSVWriterHelper csvWriterFinal = new CSVWriterHelper("final_results.csv");
+        String[] finalHeaders = {"Alg. Type", "Optimal", "Best", "Worst", "Average", "Standard Deviation"};
 
         try {
             parser.parse(filename);
             List<City> cities = parser.getCities();
+            csvWriterFinal.writeToCsvFinalResults(finalHeaders);
 
-            Path randomData = RandomAlgorithm.execute(parser.getDistanceMatrix());
-            Path greedyData = GreedyAlgorithm.execute(parser.getDistanceMatrix());
-            Path gaData = GeneticAlgorithm.executeGA(
+            executeAndLogResults("Random", RandomAlgorithm.execute(parser.getDistanceMatrix()), bestKnown, csvWriterFinal);
+            executeAndLogResults("Greedy", GreedyAlgorithm.execute(parser.getDistanceMatrix()), bestKnown, csvWriterFinal);
+            executeAndLogResults("Genetic", GeneticAlgorithm.executeGA(
                     parser.getDistanceMatrix(),
                     cities.size(),
                     initPopulationStrategy,
                     selectionStrategy,
                     crossoverStrategy,
-                    mutationStrategy
-            );
-
-            System.out.println("Random Data: " + randomData.toString());
-            System.out.println("Greedy Data: " + greedyData.toString());
-            System.out.println("GA Data: " + gaData.toString());
+                    mutationStrategy), bestKnown, csvWriterFinal);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static void executeAndLogResults(String algorithmName, Path path, Integer bestKnown, CSVWriterHelper csvWriter) {
+        System.out.println(algorithmName + " Data: " + path);
+        String[] dataToLog = {
+                algorithmName,
+                bestKnown.toString(),
+                path.getBestCost().toString(),
+                path.getWorstCost().toString(),
+                path.getAverageCost().toString(),
+                path.getStandardDeviation().toString()
+        };
+        csvWriter.writeToCsvFinalResults(dataToLog);
     }
 }
