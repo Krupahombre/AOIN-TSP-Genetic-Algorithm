@@ -1,6 +1,14 @@
 package com.krupahombre;
 
+import com.krupahombre.algorithms.GeneticAlgorithm;
+import com.krupahombre.algorithms.GreedyAlgorithm;
+import com.krupahombre.algorithms.RandomAlgorithm;
+import com.krupahombre.algorithms.utils.Path;
+import com.krupahombre.helpers.City;
+import com.krupahombre.helpers.TSPParser;
+
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 public class Main {
@@ -11,13 +19,12 @@ public class Main {
     }
 
     public static void main(String[] args) throws IOException {
-        String filename = "src/main/resources/gr666.tsp";
+        String filename = "src/main/resources/berlin52.tsp";
         String initPopulationStrategy = "greedy"; //greedy
         String selectionStrategy = "tournament";  //roulette
         String crossoverStrategy = "pmx"; //cx
-        String mutationStrategy = "swap"; //inverse
-        // Integer bestKnown = 7542; berlin
-        Integer bestKnown = 294358;
+        String mutationStrategy = "inverse"; //inverse
+        Integer bestKnown = 7542; //berlin
 
         TSPParser parser = new TSPParser();
 
@@ -25,29 +32,35 @@ public class Main {
             parser.parse(filename);
             List<City> cities = parser.getCities();
 
-            int popSize = 1000;
-            int generations = 3000;
-            double crossoverProbability = 0.5;
-            double mutationProbability = 0.5;
-            int tournamentSize = 5;
+            Path randomData = RandomAlgorithm.execute(parser.getDistanceMatrix());
+            Path greedyData = GreedyAlgorithm.execute(parser.getDistanceMatrix());
 
-            GeneticAlgorithm ga = new GeneticAlgorithm(
-                    parser.getDistanceMatrix(),
-                    popSize,
-                    generations,
-                    crossoverProbability,
-                    mutationProbability,
-                    tournamentSize
-            );
-            Integer bestFoundSolution = ga.run(
-                    cities.size(),
-                    initPopulationStrategy,
-                    selectionStrategy,
-                    crossoverStrategy,
-                    mutationStrategy
-            );
+            System.out.println("Random Data: " + randomData.getBestCost() + " " + randomData.getWorstCost());
+            System.out.println("Greedy Data: " + greedyData.getBestCost() + " " + greedyData.getWorstCost());
 
-            System.out.println("\n" + calculatePercentageToOptimal(bestKnown, bestFoundSolution));
+//            int popSize = 500;
+//            int generations = 3000;
+//            double crossoverProbability = 0.7;
+//            double mutationProbability = 0.1;
+//            int tournamentSize = 100;
+//
+//            GeneticAlgorithm ga = new GeneticAlgorithm(
+//                    parser.getDistanceMatrix(),
+//                    popSize,
+//                    generations,
+//                    crossoverProbability,
+//                    mutationProbability,
+//                    tournamentSize
+//            );
+//            Integer bestFoundSolution = ga.run(
+//                    cities.size(),
+//                    initPopulationStrategy,
+//                    selectionStrategy,
+//                    crossoverStrategy,
+//                    mutationStrategy
+//            );
+//
+//            System.out.println("\n" + calculatePercentageToOptimal(bestKnown, bestFoundSolution));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -1,4 +1,4 @@
-package com.krupahombre;
+package com.krupahombre.helpers;
 
 import static com.krupahombre.helpers.CalculationsHelper.toRadians;
 import static com.krupahombre.helpers.CalculationsHelper.nint;

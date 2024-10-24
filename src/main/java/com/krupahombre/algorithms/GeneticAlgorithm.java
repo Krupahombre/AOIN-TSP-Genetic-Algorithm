@@ -1,4 +1,4 @@
-package com.krupahombre;
+package com.krupahombre.algorithms;
 
 import java.util.*;
 import java.util.stream.IntStream;

@@ -1,4 +1,4 @@
-package com.krupahombre;
+package com.krupahombre.helpers;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
