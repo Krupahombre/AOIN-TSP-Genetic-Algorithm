@@ -1,7 +1,9 @@
 package com.krupahombre.algorithms;
 
+import com.krupahombre.algorithms.utils.Pair;
 import com.krupahombre.algorithms.utils.Path;
 import com.krupahombre.algorithms.utils.PathCreationUtils;
+import com.krupahombre.helpers.CSVWriterHelper;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -241,12 +243,13 @@ public class GeneticAlgorithm {
     }
 
     /// STARTING POINT
-    private Integer run(
+    public Integer run(
             int citiesNumber,
             String initPopulationStrategy,
             String selectionStrategy,
             String crossoverStrategy,
-            String mutationStrategy
+            String mutationStrategy,
+            CSVWriterHelper csvWriter
     ) {
         initializePopulation(citiesNumber, initPopulationStrategy);
 
@@ -255,7 +258,17 @@ public class GeneticAlgorithm {
 
         for (int generation = 0; generation < generations; generation++) {
             List<List<Integer>> newPopulation = new ArrayList<>();
-            List<Integer> costs = new ArrayList<>();
+            List<Pair<Integer, List<Integer>>> evaluatedPopulation = new ArrayList<>();
+
+            for (List<Integer> individual : population) {
+                int distance = evaluate(individual);
+                evaluatedPopulation.add(new Pair<>(distance, individual));
+            }
+            evaluatedPopulation.sort(Comparator.comparingInt(Pair::getKey));
+
+            for (int i = 0; i < Math.min(5, evaluatedPopulation.size()); i++) {
+                newPopulation.add(evaluatedPopulation.get(i).getValue());
+            }
 
             while (newPopulation.size() < popSize) {
                 List<Integer> parent1 = selectIndividual(selectionStrategy);
@@ -273,8 +286,11 @@ public class GeneticAlgorithm {
                     if (newPopulation.size() >= popSize) break;
                 }
             }
-        }
 
+            population = newPopulation;
+            if (csvWriter != null) evaluateGeneration(generation + 1, csvWriter);
+        }
+        System.out.println(citiesNumber);
         return bestSolution;
     }
 
@@ -286,8 +302,8 @@ public class GeneticAlgorithm {
             String crossoverStrategy,
             String mutationStrategy
     ) {
-        int popSize = 500;
-        int generations = 3000;
+        int popSize = 100;
+        int generations = 100;
         double crossoverProbability = 0.7;
         double mutationProbability = 0.1;
         int tournamentSize = 5;
@@ -312,7 +328,8 @@ public class GeneticAlgorithm {
                     initPopulationStrategy,
                     selectionStrategy,
                     crossoverStrategy,
-                    mutationStrategy
+                    mutationStrategy,
+                    null
             );
 
             costsGA.add(bestFoundSolution);
@@ -328,5 +345,28 @@ public class GeneticAlgorithm {
 
         System.out.println("- GA done!");
         return PathCreationUtils.createAndCalculatePath(totalCostGA, bestCostGA, worstCostGA, costsGA, 10);
+    }
+
+    private void evaluateGeneration(int generation, CSVWriterHelper csvWriterHelper) {
+        int bestDistance = Integer.MAX_VALUE;
+        int worstDistance = Integer.MIN_VALUE;
+        int totalDistance = 0;
+
+        for (List<Integer> individual : population) {
+            int distance = evaluate(individual);
+            bestDistance = Math.min(bestDistance, distance);
+            worstDistance = Math.max(worstDistance, distance);
+            totalDistance += distance;
+        }
+
+        double averageDistance = (double) totalDistance / population.size();
+
+        String[] dataToSave = {
+                String.valueOf(generation),
+                String.valueOf(bestDistance),
+                String.valueOf(worstDistance),
+                String.valueOf(averageDistance)
+        };
+        csvWriterHelper.writeToCsvFinalResults(dataToSave);
     }
 }

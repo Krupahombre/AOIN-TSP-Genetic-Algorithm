@@ -3,8 +3,8 @@ package com.krupahombre.algorithms.utils;
 import java.util.List;
 
 public class PathCreationUtils {
-    public static Path createAndCalculatePath(int totalCost, int bestCost, int worstCost, List<Integer> costs, int iterations) {
-        int averageCost = totalCost / iterations;
+    public static Path createAndCalculatePath(long totalCost, int bestCost, int worstCost, List<Integer> costs, int iterations) {
+        long averageCost = totalCost / iterations;
         double varianceSum = 0;
 
         for (int cost : costs) {

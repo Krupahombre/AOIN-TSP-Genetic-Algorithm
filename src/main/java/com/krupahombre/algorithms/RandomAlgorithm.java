@@ -14,7 +14,7 @@ public class RandomAlgorithm {
         int citiesNum = distanceMatrix.length;
         int bestCost = Integer.MAX_VALUE;
         int worstCost = 0;
-        int totalCost = 0;
+        long totalCost = 0;
         List<Integer> costs = new ArrayList<>();
         List<Integer> tour = new ArrayList<>(IntStream.rangeClosed(0, citiesNum - 1)
                 .boxed()

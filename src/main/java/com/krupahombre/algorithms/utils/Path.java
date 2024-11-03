@@ -3,7 +3,7 @@ package com.krupahombre.algorithms.utils;
 public class Path {
     private Integer bestCost;
     private Integer worstCost;
-    private Integer averageCost;
+    private Long averageCost;
     private Double standardDeviation;
 
     public Integer getBestCost() {
@@ -22,11 +22,11 @@ public class Path {
         this.worstCost = worstCost;
     }
 
-    public Integer getAverageCost() {
+    public Long getAverageCost() {
         return averageCost;
     }
 
-    public void setAverageCost(Integer averageCost) {
+    public void setAverageCost(Long averageCost) {
         this.averageCost = averageCost;
     }
 
