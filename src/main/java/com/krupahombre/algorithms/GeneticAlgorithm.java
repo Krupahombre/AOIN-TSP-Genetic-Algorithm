@@ -255,8 +255,16 @@ public class GeneticAlgorithm {
 
         List<Integer> bestPath = population.getFirst();
         int bestSolution = evaluate(bestPath);
+        long startTime = System.currentTimeMillis();
+        long timeLimit = 10 * 60 * 1000;
 
         for (int generation = 0; generation < generations; generation++) {
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            if (elapsedTime >= timeLimit) {
+                System.out.println("Time limit reached. Stopping algorithm.");
+                return bestSolution;
+            }
+
             List<List<Integer>> newPopulation = new ArrayList<>();
             List<Pair<Integer, List<Integer>>> evaluatedPopulation = new ArrayList<>();
 
