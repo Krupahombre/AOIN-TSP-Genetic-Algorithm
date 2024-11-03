@@ -25,21 +25,38 @@ public class Main {
         ));
 
         String basePath = "src/main/resources/";
-        String initPopulationStrategy = "greedy"; //greedy
-        String selectionStrategy = "tournament";  //roulette
-        String crossoverStrategy = "pmx"; //cx
-        String mutationStrategy = "inverse"; //inverse
+//        String initPopulationStrategy = "greedy"; //random
+//        String selectionStrategy = "tournament";  //roulette
+//        String crossoverStrategy = "pmx"; //cx
+//        String mutationStrategy = "inverse"; //inverse
 
         /// Compare algorithms
         System.out.println("\nAlgorithms comparison");
-        instanceMap.forEach((key, value) -> algorithmComparisonTest(key, basePath, value, initPopulationStrategy, selectionStrategy, crossoverStrategy, mutationStrategy));
+//        instanceMap.forEach((key, value) -> algorithmComparisonTest(
+//                key,
+//                basePath,
+//                value,
+//                "greedy",
+//                "tournament",
+//                "pmx",
+//                "inverse"
+//        ));
 
         /// GA for all tsp files
         System.out.println("\nGA for all tsp");
-        instanceMap.forEach((key, value) -> geneticAlgorithmTest(key, basePath, value, initPopulationStrategy, selectionStrategy, crossoverStrategy, mutationStrategy));
+//        instanceMap.forEach((key, value) -> geneticAlgorithmTest(
+//                key,
+//                basePath,
+//                value,
+//                "greedy",
+//                "tournament",
+//                "pmx",
+//                "inverse"
+//        ));
 
         /// GA parameters test
-        // tbd
+//        parametersGAComparisonTest(instanceMap);
+        configurationModificationTest(instanceMap);
     }
 
     private static void algorithmComparisonTest(String filename,
@@ -119,6 +136,55 @@ public class Main {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static void parametersGAComparisonTest(Map<String, Integer> instanceMap) {
+        String[] initPopulationOptions = {"greedy", "random"};
+        String[] selectionOptions = {"tournament", "roulette"};
+        String[] crossoverOptions = {"pmx", "cx"};
+        String[] mutationOptions = {"inverse", "swap"};
+
+        int combinationNumber = 1;
+        for (String initPopulationStrategy : initPopulationOptions) {
+            for (String selectionStrategy : selectionOptions) {
+                for (String crossoverStrategy : crossoverOptions) {
+                    for (String mutationStrategy : mutationOptions) {
+                        System.out.println(combinationNumber + ". " +
+                                initPopulationStrategy + ", " +
+                                selectionStrategy + ", " +
+                                crossoverStrategy + ", " +
+                                mutationStrategy);
+                        combinationNumber++;
+                    }
+                }
+            }
+        }
+//        TSPParser parser = new TSPParser();
+//        CSVWriterHelper csvWriterFinal = new CSVWriterHelper("parametersComparison.csv");
+    }
+
+    private static void configurationModificationTest(Map<String, Integer> instanceMap) {
+        String defaultInitPopulation = "greedy";
+        String defaultSelection = "tournament";
+        String defaultCrossover = "pmx";
+        String defaultMutation = "inverse";
+
+        String altInitPopulation = "random";
+        String altSelection = "roulette";
+        String altCrossover = "cx";
+        String altMutation = "swap";
+
+        int popSize = 100;
+        int generations = 100;
+        double crossoverProbability = 0.7;
+        double mutationProbability = 0.1;
+        int tournamentSize = 5;
+
+        TSPParser parser = new TSPParser();
+        CSVWriterHelper csvWriterFinal = new CSVWriterHelper("algorithmComparison.csv");
+        String[] finalHeaders = {"Optimal", "Best", "Worst", "Average", "Standard Deviation"};
+        String[] filenameHeader = {filename};
+        String filePath = basePath + filename;
     }
 
     private static void executeAndLogResults(String algorithmName, Path path, Integer bestKnown, CSVWriterHelper csvWriter) {
