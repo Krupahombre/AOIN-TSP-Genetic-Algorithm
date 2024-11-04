@@ -25,38 +25,34 @@ public class Main {
         ));
 
         String basePath = "src/main/resources/";
-//        String initPopulationStrategy = "greedy"; //random
-//        String selectionStrategy = "tournament";  //roulette
-//        String crossoverStrategy = "pmx"; //cx
-//        String mutationStrategy = "inverse"; //inverse
 
         /// Compare algorithms
         System.out.println("\nAlgorithms comparison");
-//        instanceMap.forEach((key, value) -> algorithmComparisonTest(
-//                key,
-//                basePath,
-//                value,
-//                "greedy",
-//                "tournament",
-//                "pmx",
-//                "inverse"
-//        ));
+        instanceMap.forEach((key, value) -> algorithmComparisonTest(
+                key,
+                basePath,
+                value,
+                "greedy",
+                "tournament",
+                "pmx",
+                "inverse"
+        ));
 
         /// GA for all tsp files
         System.out.println("\nGA for all tsp");
-//        instanceMap.forEach((key, value) -> geneticAlgorithmTest(
-//                key,
-//                basePath,
-//                value,
-//                "greedy",
-//                "tournament",
-//                "pmx",
-//                "inverse"
-//        ));
+        instanceMap.forEach((key, value) -> geneticAlgorithmTest(
+                key,
+                basePath,
+                value,
+                "greedy",
+                "tournament",
+                "pmx",
+                "inverse"
+        ));
 
         /// GA parameters test
-//        parametersGAComparisonTest(instanceMap);
-        configurationModificationTest(instanceMap);
+        System.out.println("\nGA configuration parameters comparison");
+        configurationModificationTest(instanceMap, basePath);
     }
 
     private static void algorithmComparisonTest(String filename,
@@ -86,7 +82,7 @@ public class Main {
                     initPopulationStrategy,
                     selectionStrategy,
                     crossoverStrategy,
-                    mutationStrategy), bestKnown, csvWriterFinal);
+                    mutationStrategy, false), bestKnown, csvWriterFinal);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -138,53 +134,134 @@ public class Main {
         }
     }
 
-    private static void parametersGAComparisonTest(Map<String, Integer> instanceMap) {
-        String[] initPopulationOptions = {"greedy", "random"};
-        String[] selectionOptions = {"tournament", "roulette"};
-        String[] crossoverOptions = {"pmx", "cx"};
-        String[] mutationOptions = {"inverse", "swap"};
-
-        int combinationNumber = 1;
-        for (String initPopulationStrategy : initPopulationOptions) {
-            for (String selectionStrategy : selectionOptions) {
-                for (String crossoverStrategy : crossoverOptions) {
-                    for (String mutationStrategy : mutationOptions) {
-                        System.out.println(combinationNumber + ". " +
-                                initPopulationStrategy + ", " +
-                                selectionStrategy + ", " +
-                                crossoverStrategy + ", " +
-                                mutationStrategy);
-                        combinationNumber++;
-                    }
-                }
-            }
-        }
-//        TSPParser parser = new TSPParser();
-//        CSVWriterHelper csvWriterFinal = new CSVWriterHelper("parametersComparison.csv");
-    }
-
-    private static void configurationModificationTest(Map<String, Integer> instanceMap) {
+    private static void configurationModificationTest(Map<String, Integer> instanceMap, String basePath) {
         String defaultInitPopulation = "greedy";
         String defaultSelection = "tournament";
         String defaultCrossover = "pmx";
         String defaultMutation = "inverse";
 
-        String altInitPopulation = "random";
-        String altSelection = "roulette";
-        String altCrossover = "cx";
-        String altMutation = "swap";
+        String[] initPopulationOptions = {"greedy", "random"};
+        String[] selectionOptions = {"tournament", "roulette"};
+        String[] crossoverOptions = {"pmx", "ox"};
+        String[] mutationOptions = {"inverse", "swap"};
 
-        int popSize = 100;
-        int generations = 100;
-        double crossoverProbability = 0.7;
-        double mutationProbability = 0.1;
-        int tournamentSize = 5;
+        String[] finalHeaders = {"Compare", "Optimal", "Best", "Worst", "Average", "Standard Deviation"};
 
-        TSPParser parser = new TSPParser();
-        CSVWriterHelper csvWriterFinal = new CSVWriterHelper("algorithmComparison.csv");
-        String[] finalHeaders = {"Optimal", "Best", "Worst", "Average", "Standard Deviation"};
-        String[] filenameHeader = {filename};
-        String filePath = basePath + filename;
+        CSVWriterHelper csvWriterFinal1 = new CSVWriterHelper("initPopTest.csv");
+        for (String initPopulation : initPopulationOptions) {
+            instanceMap.forEach((key, value) -> {
+                TSPParser parser = new TSPParser();
+                String[] filenameHeader = {key};
+                String[] typeHeader = {initPopulation};
+                String filePath = basePath + key;
+
+                try {
+                    parser.parse(filePath);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                List<City> cities = parser.getCities();
+                csvWriterFinal1.writeToCsvFinalResults(filenameHeader);
+                csvWriterFinal1.writeToCsvFinalResults(typeHeader);
+                csvWriterFinal1.writeToCsvFinalResults(finalHeaders);
+
+                executeAndLogResults("greedy-random", GeneticAlgorithm.executeGA(
+                        parser.getDistanceMatrix(),
+                        cities.size(),
+                        initPopulation,
+                        defaultSelection,
+                        defaultCrossover,
+                        defaultMutation, false), value, csvWriterFinal1);
+            });
+        }
+
+        CSVWriterHelper csvWriterFinal2 = new CSVWriterHelper("selectionTest.csv");
+        for (String selection : selectionOptions) {
+            instanceMap.forEach((key, value) -> {
+                TSPParser parser = new TSPParser();
+                String[] filenameHeader = {key};
+                String[] typeHeader = {selection};
+                String filePath = basePath + key;
+
+                try {
+                    parser.parse(filePath);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                List<City> cities = parser.getCities();
+                csvWriterFinal2.writeToCsvFinalResults(filenameHeader);
+                csvWriterFinal2.writeToCsvFinalResults(typeHeader);
+                csvWriterFinal2.writeToCsvFinalResults(finalHeaders);
+
+                executeAndLogResults("tournament-roulette", GeneticAlgorithm.executeGA(
+                        parser.getDistanceMatrix(),
+                        cities.size(),
+                        defaultInitPopulation,
+                        selection,
+                        defaultCrossover,
+                        defaultMutation, false), value, csvWriterFinal2);
+            });
+        }
+
+        CSVWriterHelper csvWriterFinal3 = new CSVWriterHelper("crossoverTest.csv");
+        for (String crossover : crossoverOptions) {
+            instanceMap.forEach((key, value) -> {
+                TSPParser parser = new TSPParser();
+                String[] filenameHeader = {key};
+                String[] typeHeader = {crossover};
+                String filePath = basePath + key;
+
+                try {
+                    parser.parse(filePath);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                List<City> cities = parser.getCities();
+                csvWriterFinal3.writeToCsvFinalResults(filenameHeader);
+                csvWriterFinal3.writeToCsvFinalResults(typeHeader);
+                csvWriterFinal3.writeToCsvFinalResults(finalHeaders);
+
+                executeAndLogResults("pmx-cx", GeneticAlgorithm.executeGA(
+                        parser.getDistanceMatrix(),
+                        cities.size(),
+                        defaultInitPopulation,
+                        defaultSelection,
+                        crossover,
+                        defaultMutation, false), value, csvWriterFinal3);
+            });
+        }
+
+        CSVWriterHelper csvWriterFinal4 = new CSVWriterHelper("mutationTest.csv");
+        for (String mutation : mutationOptions) {
+            instanceMap.forEach((key, value) -> {
+                TSPParser parser = new TSPParser();
+                String[] filenameHeader = {key};
+                String[] typeHeader = {mutation};
+                String filePath = basePath + key;
+
+                try {
+                    parser.parse(filePath);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                List<City> cities = parser.getCities();
+                csvWriterFinal4.writeToCsvFinalResults(filenameHeader);
+                csvWriterFinal4.writeToCsvFinalResults(typeHeader);
+                csvWriterFinal4.writeToCsvFinalResults(finalHeaders);
+
+                executeAndLogResults("inverse-swap", GeneticAlgorithm.executeGA(
+                        parser.getDistanceMatrix(),
+                        cities.size(),
+                        defaultInitPopulation,
+                        defaultSelection,
+                        defaultCrossover,
+                        mutation, false), value, csvWriterFinal4);
+            });
+        }
     }
 
     private static void executeAndLogResults(String algorithmName, Path path, Integer bestKnown, CSVWriterHelper csvWriter) {

@@ -59,7 +59,7 @@ public class GeneticAlgorithm {
         return switch (selectionStrategy.toLowerCase()) {
             case "tournament" -> tournamentSelection();
             case "roulette" -> rouletteSelection();
-            default -> throw new IllegalArgumentException("Invalid mutation strategy: " + selectionStrategy);
+            default -> throw new IllegalArgumentException("Invalid selection strategy: " + selectionStrategy);
         };
     }
 
@@ -68,7 +68,7 @@ public class GeneticAlgorithm {
             return switch (crossoverStrategy.toLowerCase()) {
                 case "ox" -> orderedCrossover(parent1, parent2);
                 case "pmx" -> partiallyMappedCrossover(parent1, parent2);
-                default -> throw new IllegalArgumentException("Invalid mutation strategy: " + crossoverStrategy);
+                default -> throw new IllegalArgumentException("Invalid crossover strategy: " + crossoverStrategy);
             };
         } else {
             return List.of(parent1);
@@ -308,7 +308,8 @@ public class GeneticAlgorithm {
             String initPopulationStrategy,
             String selectionStrategy,
             String crossoverStrategy,
-            String mutationStrategy
+            String mutationStrategy,
+            Boolean configTest
     ) {
         int popSize = 100;
         int generations = 100;
@@ -349,10 +350,12 @@ public class GeneticAlgorithm {
             System.out.println("Total cost: " + totalCostGA);
             System.out.println("Best found solution: " + bestFoundSolution);
             System.out.println("Worst found solution: " + worstCostGA);
+
+            if (configTest) break;
         }
 
         System.out.println("- GA done!");
-        return PathCreationUtils.createAndCalculatePath(totalCostGA, bestCostGA, worstCostGA, costsGA, 10);
+        return PathCreationUtils.createAndCalculatePath(totalCostGA, bestCostGA, worstCostGA, costsGA, configTest ? 1 : 10);
     }
 
     private void evaluateGeneration(int generation, CSVWriterHelper csvWriterHelper) {
