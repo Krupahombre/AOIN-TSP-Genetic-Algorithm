@@ -53,6 +53,9 @@ public class Main {
         /// GA parameters test
         System.out.println("\nGA configuration parameters comparison");
         configurationModificationTest(instanceMap, basePath);
+
+        /// GA numeric parameter test
+        numericParametersTest(instanceMap, basePath);
     }
 
     private static void algorithmComparisonTest(String filename,
@@ -260,6 +263,53 @@ public class Main {
                         defaultSelection,
                         defaultCrossover,
                         mutation, false), value, csvWriterFinal4);
+            });
+        }
+    }
+
+    private static void numericParametersTest(Map<String, Integer> instanceMap, String basePath) {
+        System.out.println("Numeric Parameters Test");
+        Integer popSizeDef = 100;
+        Integer generationsDef = 100;
+        Double crossoverProbabilityDef = 0.7;
+        Double mutationProbabilityDef = 0.1;
+        Integer tournamentSizeDef = 5;
+
+        Integer[] popSizeOptions = {100, 1000, 3000};
+        Integer[] generationsOptions = {100, 1000, 3000};
+        Double[] crossoverProbabilityOptions = {0.2, 0.4, 0.7};
+        Double[] mutationProbabilityOptions = {0.1, 0.3, 0.5};
+        Integer[] tournamentSizeOptions = {3, 5, 7};
+
+        String[] finalHeaders = {"Compare", "Optimal", "Best", "Worst", "Average", "Standard Deviation"};
+
+        CSVWriterHelper csvWriterFinal1 = new CSVWriterHelper("initPopTest.csv");
+        for (Integer popSize : popSizeOptions) {
+            instanceMap.forEach((key, value) -> {
+                TSPParser parser = new TSPParser();
+                String[] filenameHeader = {key};
+                String[] typeHeader = {"Pop Size" + popSize};
+                String filePath = basePath + key;
+
+                try {
+                    parser.parse(filePath);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                List<City> cities = parser.getCities();
+                csvWriterFinal1.writeToCsvFinalResults(filenameHeader);
+                csvWriterFinal1.writeToCsvFinalResults(typeHeader);
+                csvWriterFinal1.writeToCsvFinalResults(finalHeaders);
+
+                executeAndLogResults("popsize", GeneticAlgorithm.executeGACustomNumeric(
+                        parser.getDistanceMatrix(),
+                        cities.size(),
+                        popSize,
+                        generationsDef,
+                        crossoverProbabilityDef,
+                        mutationProbabilityDef,
+                        tournamentSizeDef, false), value, csvWriterFinal1);
             });
         }
     }

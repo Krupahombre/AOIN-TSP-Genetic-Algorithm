@@ -358,6 +358,62 @@ public class GeneticAlgorithm {
         return PathCreationUtils.createAndCalculatePath(totalCostGA, bestCostGA, worstCostGA, costsGA, configTest ? 1 : 10);
     }
 
+    public static Path executeGACustomNumeric(
+            int[][] distanceMatrix,
+            int citiesSize,
+            int popSize,
+            int generations,
+            double crossoverProbability,
+            double mutationProbability,
+            int tournamentSize,
+            Boolean configTest
+    ) {
+        String initPopulationStrategy = "greedy";
+        String selectionStrategy = "tournament";
+        String crossoverStrategy = "pmx";
+        String mutationStrategy = "inverse";
+
+        List<Integer> costsGA = new ArrayList<>();
+        int bestCostGA = Integer.MAX_VALUE;
+        int worstCostGA = 0;
+        int totalCostGA = 0;
+
+        for (int i = 0; i < 10; i++) {
+            GeneticAlgorithm ga = new GeneticAlgorithm(
+                    distanceMatrix,
+                    popSize,
+                    generations,
+                    crossoverProbability,
+                    mutationProbability,
+                    tournamentSize
+            );
+
+            Integer bestFoundSolution = ga.run(
+                    citiesSize,
+                    initPopulationStrategy,
+                    selectionStrategy,
+                    crossoverStrategy,
+                    mutationStrategy,
+                    null
+            );
+
+            costsGA.add(bestFoundSolution);
+            bestCostGA = Math.min(bestCostGA, bestFoundSolution);
+            worstCostGA = Math.max(worstCostGA, bestFoundSolution);
+            totalCostGA += bestFoundSolution;
+
+            System.out.println("--- GA iteration no. " + (i + 1));
+            System.out.println("Total cost: " + totalCostGA);
+            System.out.println("Best found solution: " + bestFoundSolution);
+            System.out.println("Worst found solution: " + worstCostGA);
+
+            if (configTest) break;
+        }
+
+        System.out.println("- GA done!");
+        return PathCreationUtils.createAndCalculatePath(totalCostGA, bestCostGA, worstCostGA, costsGA, configTest ? 1 : 10);
+    }
+
     private void evaluateGeneration(int generation, CSVWriterHelper csvWriterHelper) {
         int bestDistance = Integer.MAX_VALUE;
         int worstDistance = Integer.MIN_VALUE;
